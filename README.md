@@ -1,5 +1,5 @@
 # igfeed
-On new Instagram post -> Send Discord Webhook
+### On new Instagram post -> Send Discord Webhook
 
 Pretty simple and sassy~
 
