@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "got": "^9.6.0"
+    "corrin": "^1.1.2",
+    "despair": "^2.1.0"
   }
 }

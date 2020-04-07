@@ -1,18 +1,17 @@
-let Feed = require('./newfeed')
-let got = require('got')
 let fs = require('fs')
-
+let Corrin = require('corrin')
+let dp = require('despair')
 let cfg = config('config.json')
 
-let feed = new Feed({ name: cfg.name })
+let feed = new Corrin([async () => (await data(cfg.name)).items, x => x.node.id])
 console.log(`Tracking Instagram posts of ${cfg.name}...`)
 
 feed.on('new', async items => {
-  let res = body()
-  items.forEach(item => {
+  let user = await data(cfg.name)
+  let res = body(user)
+  items['0'].forEach(item => {
     let data = {
-      type: item.node.is_video ? 'video' : 'image',
-      url: item.node.is_video ? item.node.video_url : item.node.display_url,
+      url: item.node.display_url,
       link: 'https://instagram.com/p/' + item.node.shortcode,
       caption: item.node.edge_media_to_caption.edges[0] ? item.node.edge_media_to_caption.edges[0].node.text : '',
       timestamp: (new Date(item.node.taken_at_timestamp * 1000)).toISOString()
@@ -26,17 +25,17 @@ feed.on('new', async items => {
 function send (data) {
   if (!cfg.hook) return
   try {
-    got.post(cfg.hook, {
-      body: data,
-      json: true
+    dp.post(cfg.hook, {
+      data: data,
+      type: 'json'
     })
-  } catch (e) { if (e) console.error(e) }
+  } catch (e) { console.error(e) }
 }
 
-function body () {
+function body (user) {
   return {
-    username: cfg.name || 'Instagram',
-    avatar_url: feed.avatar || 'https://i.imgur.com/LZA6IN2.png',
+    username: user.name || 'Instagram',
+    avatar_url: user.avatar || 'https://i.imgur.com/LZA6IN2.png',
     embeds: []
   }
 }
@@ -71,4 +70,20 @@ function config (file) {
   return cfg
 }
 
-// pear was here
+async function data (name) {
+  let body = await dp(`https://www.instagram.com/${name}`, { query: { __a: 1 } }).json().catch(e => {
+    throw Error(`Could not find the user '${name}'`)
+  })
+  let user = body.graphql.user
+  return {
+    name: user.username,
+    avatar: user.profile_pic_url,
+    items: user.edge_owner_to_timeline_media.edges
+  }
+}
+
+process.on('unhandledRejection', err => {
+  console.log(err)
+  console.error(`\x1b[31mError: ${err.message}\x1b[0m`)
+  process.exit(1)
+})
