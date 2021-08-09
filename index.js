@@ -135,6 +135,9 @@ dp('https://www.instagram.com/graphql/query', {
   query: {
     query_hash: '472f257a40c653c64c666ce877d59d2b',
     variables: JSON.stringify({ id: 45165826236, first: 10 })
+  },
+  headers: {
+    Cookie: 'ig_pr=2'
   }
 }).json().then(res => {
   console.log(res)
