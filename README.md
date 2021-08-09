@@ -9,7 +9,7 @@ Pretty simple and sassy~
 ## Running
 1. Make sure you installed all packages with `npm install`
 2. Configure settings in `config.json`
-3. Start with `npm run start`
+3. Start `run.bat`
 
 | Legacy | Normal |
 |-|-|
