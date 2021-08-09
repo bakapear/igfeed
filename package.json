@@ -10,6 +10,6 @@
   "license": "ISC",
   "dependencies": {
     "corrin": "^1.1.2",
-    "despair": "^2.1.0"
+    "despair": "^2.1.2"
   }
 }

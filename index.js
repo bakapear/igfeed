@@ -1,41 +1,58 @@
 let fs = require('fs')
-let Corrin = require('corrin')
 let dp = require('despair')
+let Corrin = require('corrin')
 let cfg = config('config.json')
 
-let feed = new Corrin([async () => (await data(cfg.name)).items, x => x.node.id])
-console.log(`Tracking Instagram posts of ${cfg.name}...`)
-
-feed.on('new', async items => {
-  let user = await data(cfg.name)
-  let res = body(user)
-  items['0'].forEach(item => {
-    let data = {
-      url: item.node.display_url,
-      link: 'https://instagram.com/p/' + item.node.shortcode,
-      caption: item.node.edge_media_to_caption.edges[0] ? item.node.edge_media_to_caption.edges[0].node.text : '',
-      timestamp: (new Date(item.node.taken_at_timestamp * 1000)).toISOString()
+let IG = {
+  getUser: async name => {
+    let body = await dp('https://www.instagram.com/web/search/topsearch', {
+      query: { query: name }
+    }).json()
+    if (!body.users.length) die(`Could not find any profiles matching '${name}'`)
+    let user = body.users[0].user
+    return {
+      id: user.pk,
+      name: user.full_name || user.username,
+      avatar: user.profile_pic_url
     }
-    res.embeds.push(embed(data))
-  })
-  send(res)
-  notify(res)
-})
-
-function send (data) {
-  if (!cfg.hook) return
-  try {
-    dp.post(cfg.hook, {
-      data: data,
-      type: 'json'
+  },
+  getMedia: async (id, num) => {
+    let body = await dp('https://www.instagram.com/graphql/query/', {
+      query: {
+        query_hash: '58b6785bea111c67129decbe6a448951',
+        variables: JSON.stringify({ id: id, first: num })
+      }
+    }).json()
+    return body.data.user.edge_owner_to_timeline_media.edges.map(node => {
+      let item = node.node
+      return {
+        id: item.id,
+        video: item.is_video ? item.video_url : null,
+        url: item.display_url,
+        link: 'https://instagram.com/p/' + item.shortcode,
+        caption: item.edge_media_to_caption.edges[0] ? item.edge_media_to_caption.edges[0].node.text : '',
+        timestamp: new Date(item.taken_at_timestamp * 1000)
+      }
     })
-  } catch (e) { console.error(e) }
+  }
+}
+
+function config (file) {
+  if (!fs.existsSync(file)) die(`${file} not present!`)
+  let cfg = null
+  try {
+    cfg = JSON.parse(fs.readFileSync(file, { encoding: 'utf-8' }))
+  } catch (e) { die(`Could not parse ${file}!`) }
+  if (!cfg.legacyMode) cfg.legacyMode = {}
+  if (!cfg.name) die(`${file} is missing the "name" property!`)
+  if (!cfg.hook) die(`${file} is missing the "hook" property!`)
+  return cfg
 }
 
 function body (user) {
   return {
     username: user.name || 'Instagram',
-    avatar_url: user.avatar || 'https://i.imgur.com/LZA6IN2.png',
+    avatar_url: cfg.avatar || user.avatar || 'https://i.imgur.com/LZA6IN2.png',
     embeds: []
   }
 }
@@ -43,7 +60,7 @@ function body (user) {
 function embed (item) {
   let res = {
     title: `${cfg.name} posted on Instagram!`,
-    color: cfg.color || undefined,
+    color: cfg.legacyMode.color || undefined,
     url: item.link,
     timestamp: item.timestamp,
     image: { url: item.url }
@@ -52,38 +69,44 @@ function embed (item) {
   return res
 }
 
+function send (data) {
+  if (!cfg.hook) return
+  try {
+    dp.post(cfg.hook, {
+      data: data,
+      type: 'json'
+    }).catch(e => die(e.message))
+  } catch (e) { die(e.message) }
+}
+
 function notify (res) {
   if (!res || !res.embeds) return
   for (let i = 0; i < res.embeds.length; i++) {
-    console.log(`[${res.embeds[i].timestamp}] - ${res.embeds[i].url}`)
+    console.log(`[${res.embeds[i].timestamp.toISOString()}] - ${res.embeds[i].url}`)
   }
 }
 
-function config (file) {
-  if (!fs.existsSync(file)) throw new Error(`${file} not present!`)
-  let cfg = null
-  try {
-    cfg = JSON.parse(fs.readFileSync(file, { encoding: 'utf-8' }))
-  } catch (e) { throw new Error(`Error parsing ${file}!`) }
-  if (!cfg.name) throw new Error(`${file} is missing the "name" property!`)
-  if (!cfg.hook) throw new Error(`${file} is missing the "hook" property!`)
-  return cfg
-}
-
-async function data (name) {
-  let body = await dp(`https://www.instagram.com/${name}`, { query: { __a: 1 } }).json().catch(e => {
-    throw Error(`Could not find the user '${name}'`)
-  })
-  let user = body.graphql.user
-  return {
-    name: user.username,
-    avatar: user.profile_pic_url,
-    items: user.edge_owner_to_timeline_media.edges
-  }
-}
-
-process.on('unhandledRejection', err => {
-  console.log(err)
-  console.error(`\x1b[31mError: ${err.message}\x1b[0m`)
+function die (err) {
+  console.error(`\x1b[31mError: ${err}\x1b[0m`)
   process.exit(1)
-})
+}
+
+async function main () {
+  let user = await IG.getUser(cfg.name)
+
+  let feed = new Corrin([() => IG.getMedia(user.id, 10), x => x.id], cfg.interval)
+  console.log(`Tracking Instagram posts of ${cfg.name}...`)
+
+  feed.on('new', async items => {
+    let res = body(user)
+    items['0'].forEach(item => res.embeds.push(embed(item)))
+    if (cfg.logging) notify(res)
+    if (!cfg.legacyMode.enabled) {
+      res.content = res.embeds.map(x => x.url).join('\n')
+      delete res.embeds
+    }
+    send(res)
+  })
+}
+
+main()

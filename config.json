@@ -1,5 +1,10 @@
 {
-    "name": "9gag",
-    "hook": "https://discordapp.com/api/webhooks/uffjAFIBlablabalbalbalbalbaefijeqif",
-    "color": 4248421
+    "name": "ultralaser1986",
+    "hook": "https://discord.com/api/webhooks/blablabla",
+    "logging": true,
+    "interval": 60000,
+    "legacyMode": {
+        "enabled": false,
+        "color": 4248421
+    }
 }
