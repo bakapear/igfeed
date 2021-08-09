@@ -19,6 +19,7 @@ let IG = {
   },
   */
   getMedia: async (id, num) => {
+    console.log('getMedia', id)
     let body = await dp('https://www.instagram.com/graphql/query/', {
       query: {
         query_hash: '58b6785bea111c67129decbe6a448951',
