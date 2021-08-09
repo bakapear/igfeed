@@ -1,10 +1,15 @@
 {
-    "name": "ultralaser1986",
+    "id": "45165826236",
     "hook": "https://discord.com/api/webhooks/blablabla",
     "logging": true,
     "interval": 60000,
     "legacyMode": {
         "enabled": false,
         "color": 4248421
+    },
+    "overrides": {
+        "enabled": false,
+        "name": "Instagram",
+        "avatar": "https://i.imgur.com/LZA6IN2.png"
     }
 }

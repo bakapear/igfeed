@@ -4,6 +4,7 @@ let Corrin = require('corrin')
 let cfg = config('config.json')
 
 let IG = {
+  /*
   getUser: async name => {
     let body = await dp('https://www.instagram.com/web/search/topsearch', {
       query: { query: name }
@@ -16,6 +17,7 @@ let IG = {
       avatar: user.profile_pic_url
     }
   },
+  */
   getMedia: async (id, num) => {
     let body = await dp('https://www.instagram.com/graphql/query/', {
       query: {
@@ -34,9 +36,7 @@ let IG = {
         timestamp: new Date(item.taken_at_timestamp * 1000)
       }
     })
-  },
-  name: 'Instagram',
-  avatar: 'https://i.imgur.com/LZA6IN2.png'
+  }
 }
 
 function config (file) {
@@ -46,12 +46,15 @@ function config (file) {
     cfg = JSON.parse(fs.readFileSync(file, { encoding: 'utf-8' }))
   } catch (e) { die(`Could not parse ${file}!`) }
   if (!cfg.legacyMode) cfg.legacyMode = {}
+  if (!cfg.overrides) cfg.overrides = {}
 
-  if (process.env.NAME) cfg.name = process.env.NAME
+  if (process.env.ID) cfg.name = process.env.ID
   if (process.env.HOOK) cfg.hook = process.env.HOOK
   if (process.env.INTERVAL) cfg.interval = process.env.INTERVAL
   if (process.env.LEGACY) cfg.legacyMode.enabled = true
   if (process.env.COLOR) cfg.legacyMode.color = process.env.COLOR
+  if (process.env.NAME) cfg.overrides.name = process.env.NAME
+  if (process.env.AVATAR) cfg.overrides.avatar = process.env.AVATAR
 
   if (!cfg.name) die(`${file} is missing the "name" property!`)
   if (!cfg.hook) die(`${file} is missing the "hook" property!`)
@@ -61,9 +64,9 @@ function config (file) {
 
 function body (user) {
   let res = { embeds: [] }
-  if (cfg.legacyMode.enabled) {
-    res.username = user.name
-    res.avatar_url = user.avatar
+  if (cfg.overrides.enabled) {
+    res.username = cfg.overrides.name
+    res.avatar_url = cfg.overrides.avatar
   }
   return res
 }
@@ -103,7 +106,7 @@ function die (err) {
 }
 
 async function main () {
-  let user = await IG.getUser(cfg.name)
+  let user = { id: cfg.id } // await IG.getUser(cfg.name)
 
   let feed = new Corrin([() => IG.getMedia(user.id, 10), x => x.id], cfg.interval)
   console.log(`Tracking Instagram posts of ${cfg.name}...`)
