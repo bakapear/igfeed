@@ -34,7 +34,9 @@ let IG = {
         timestamp: new Date(item.taken_at_timestamp * 1000)
       }
     })
-  }
+  },
+  name: 'Instagram',
+  avatar: 'https://i.imgur.com/LZA6IN2.png'
 }
 
 function config (file) {
@@ -50,11 +52,12 @@ function config (file) {
 }
 
 function body (user) {
-  return {
-    username: user.name || 'Instagram',
-    avatar_url: cfg.avatar || user.avatar || 'https://i.imgur.com/LZA6IN2.png',
-    embeds: []
+  let res = { embeds: [] }
+  if (cfg.legacyMode.enabled) {
+    res.username = user.name
+    res.avatar_url = user.avatar
   }
+  return res
 }
 
 function embed (item) {
