@@ -131,6 +131,11 @@ async function main () {
 
 // main()
 
-dp('https://www.instagram.com/ultralaser1986/channel/?__a=1').json().then(res => {
+dp('https://www.instagram.com/graphql/query', {
+  query: {
+    query_hash: '472f257a40c653c64c666ce877d59d2b',
+    variables: JSON.stringify({ id: 45165826236, first: 10 })
+  }
+}).json().then(res => {
   console.log(res)
 })
