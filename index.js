@@ -131,14 +131,17 @@ async function main () {
 
 // main()
 
-dp('https://www.instagram.com/graphql/query', {
-  query: {
-    query_hash: '472f257a40c653c64c666ce877d59d2b',
-    variables: JSON.stringify({ id: 45165826236, first: 10 })
-  },
+dp('https://www.instagram.com/ultralaser1986/?__a=1', {
   headers: {
-    Cookie: 'ig_pr=2'
+    accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+    'accept-language': 'en',
+    'cache-control': 'max-age=0',
+    'sec-ch-ua': '"Chromium";v="92", " Not A;Brand";v="99", "Google Chrome";v="92"',
+    'sec-ch-ua-mobile': '?0',
+    'sec-fetch-dest': 'document',
+    'sec-fetch-mode': 'navigate',
+    'sec-fetch-site': 'none',
+    'sec-fetch-user': '?1',
+    'upgrade-insecure-requests': '1'
   }
-}).json().then(res => {
-  console.log(res)
-})
+}).json().then(r => console.log(r))
