@@ -131,16 +131,5 @@ async function main () {
 
 // main()
 
-dp('https://www.instagram.com/graphql/query/', {
-  query: {
-    query_hash: '58b6785bea111c67129decbe6a448951',
-    variables: JSON.stringify({ id: '45165826236', first: 10 })
-  },
-  headers: {
-    'x-asbd-id': '437806',
-    'x-csrftoken': '0afT6dptd6xhd5VVDMGcsglzPOSCU1jC',
-    'x-ig-app-id': '936619743392459',
-    'x-ig-www-claim': '0',
-    'x-mid': 'lnu22n1411r701mq9ek842mn6bran3kvwb5k1wuzfy715it74'
-  }
-}).json().then(r => console.log(r))
+dp('https://www.instagram.com/ultralaser1986/', {
+}).text().then(r => console.log(r.indexOf('_sharedData')))
