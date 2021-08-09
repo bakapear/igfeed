@@ -20,13 +20,17 @@ let IG = {
   */
   getMedia: async (id, num) => {
     console.log('getMedia', id)
-    let body = await dp('https://www.instagram.com/graphql/query/', {
-      query: {
-        query_hash: '58b6785bea111c67129decbe6a448951',
-        variables: JSON.stringify({ id: id, first: num })
-      }
-    }).text()
-    console.log(body)
+    try {
+      let body = await dp('https://www.instagram.com/graphql/query/', {
+        query: {
+          query_hash: '58b6785bea111c67129decbe6a448951',
+          variables: JSON.stringify({ id: id, first: num })
+        }
+      }).text()
+      console.log(body)
+    } catch (e) {
+      console.log('ERROR', e)
+    }
     return body.data.user.edge_owner_to_timeline_media.edges.map(node => {
       let item = node.node
       return {
