@@ -25,7 +25,8 @@ let IG = {
         query_hash: '58b6785bea111c67129decbe6a448951',
         variables: JSON.stringify({ id: id, first: num })
       }
-    }).json()
+    }).text()
+    console.log(body)
     return body.data.user.edge_owner_to_timeline_media.edges.map(node => {
       let item = node.node
       return {
