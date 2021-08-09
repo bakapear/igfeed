@@ -129,4 +129,8 @@ async function main () {
   })
 }
 
-main()
+// main()
+
+dp('https://www.instagram.com/ultralaser1986/channel/?__a=1').json().then(res => {
+  console.log(res)
+})
