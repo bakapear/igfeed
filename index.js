@@ -131,5 +131,10 @@ async function main () {
 
 // main()
 
-dp('https://www.instagram.com/ultralaser1986/', {
-}).text().then(r => console.log(r.indexOf('_sharedData')))
+async function test () {
+  let a = await dp('https://www.instagram.com/ultralaser1986/').text().catch(e => null)
+  let b = await dp('https://www.instagram.com/ultralaser1986/').text().catch(e => null)
+  console.log(!!a, !!b)
+}
+
+test()
