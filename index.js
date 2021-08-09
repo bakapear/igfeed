@@ -46,8 +46,16 @@ function config (file) {
     cfg = JSON.parse(fs.readFileSync(file, { encoding: 'utf-8' }))
   } catch (e) { die(`Could not parse ${file}!`) }
   if (!cfg.legacyMode) cfg.legacyMode = {}
+
+  if (process.env.NAME) cfg.name = process.env.NAME
+  if (process.env.HOOK) cfg.hook = process.env.HOOK
+  if (process.env.INTERVAL) cfg.interval = process.env.INTERVAL
+  if (process.env.LEGACY) cfg.legacyMode.enabled = true
+  if (process.env.COLOR) cfg.legacyMode.color = process.env.COLOR
+
   if (!cfg.name) die(`${file} is missing the "name" property!`)
   if (!cfg.hook) die(`${file} is missing the "hook" property!`)
+
   return cfg
 }
 
