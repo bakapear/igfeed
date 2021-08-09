@@ -48,7 +48,7 @@ function config (file) {
   if (!cfg.legacyMode) cfg.legacyMode = {}
   if (!cfg.overrides) cfg.overrides = {}
 
-  if (process.env.ID) cfg.name = process.env.ID
+  if (process.env.ID) cfg.id = process.env.ID
   if (process.env.HOOK) cfg.hook = process.env.HOOK
   if (process.env.INTERVAL) cfg.interval = process.env.INTERVAL
   if (process.env.LEGACY) cfg.legacyMode.enabled = true
@@ -56,7 +56,7 @@ function config (file) {
   if (process.env.NAME) cfg.overrides.name = process.env.NAME
   if (process.env.AVATAR) cfg.overrides.avatar = process.env.AVATAR
 
-  if (!cfg.name) die(`${file} is missing the "name" property!`)
+  if (!cfg.id) die(`${file} is missing the "id" property!`)
   if (!cfg.hook) die(`${file} is missing the "hook" property!`)
 
   return cfg
@@ -109,7 +109,7 @@ async function main () {
   let user = { id: cfg.id } // await IG.getUser(cfg.name)
 
   let feed = new Corrin([() => IG.getMedia(user.id, 10), x => x.id], cfg.interval)
-  console.log(`Tracking Instagram posts of ${cfg.name}...`)
+  console.log(`Tracking Instagram posts of ${cfg.id}...`)
 
   feed.on('new', async items => {
     let res = body(user)
